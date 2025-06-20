@@ -1,0 +1,5 @@
+
+Number of unique gene names in Mouse.MitoCarta3.0.fasta.txt: 1140
+Number of unique sequences in Mouse.MitoCarta3.0.fasta.txt: 1369
+
+WARNING: NP_001103982 has mitocarta gene name Mettl8 with top blast hit to Q8BMK1 but previous queries with that gene name hit A2AUU0.

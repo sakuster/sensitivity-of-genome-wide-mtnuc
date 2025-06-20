@@ -1,0 +1,6 @@
+
+Number of unique gene names in Human.MitoCarta3.0.fasta.txt: 1136
+Number of unique sequences in Human.MitoCarta3.0.fasta.txt: 1961
+
+WARNING: NP_663303 has mitocarta gene name MRPL33 and returns no blast hit but previous queries with that gene name hit O75394.
+WARNING: NP_055232 has mitocarta gene name BBC3 and returns no blast hit but previous queries with that gene name hit Q96PG8.

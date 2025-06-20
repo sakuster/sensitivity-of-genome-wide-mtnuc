@@ -1,0 +1,5 @@
+makeblastdb -in M_musculus_UP000000589_protseq -dbtype prot
+
+blastp -db M_musculus_UP000000589_protseq -query Mouse.MitoCarta3.0.fasta.txt -evalue 0.001 -num_threads 16 -out mouse.blast.txt
+
+perl mitocarta_to_uniprot.pl Mouse.MitoCarta3.0.fasta.txt M_musculus_UP000000589_protseq mouse.blast.txt > mouse_mc_up_comparison.txt 2> mouse_mc_up_comparison.stderr

@@ -1,0 +1,5 @@
+Genes with 100% identity & coverage: 1122
+Genes with 100% identity: 20
+Genes with 99% identity: 26
+Genes with 98% identity: 2
+All MitoCarta Genes have been found
