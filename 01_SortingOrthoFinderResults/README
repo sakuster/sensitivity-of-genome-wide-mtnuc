@@ -1,0 +1,5 @@
+This folder sorts the output of OrthoFinder, which is not uploaded here. 
+
+Our run of OrthoFinder was stored in a local folder called Results_Jun10, so if you see any reference to that directory, it is the OrthoFinder output. 
+
+The list of n-mt genes and interacting n-mt genes came from MCtoUP folder (find that directory in the main of this repository)
