@@ -1,0 +1,238 @@
+Order of operations
+
+
+
+1. Identify N-mt Genes in Xiphophorus
+
+get mitocarta gene list (has official gene symbol on it)
+- use Dan's perl script to find blast matches that match each mitocarta gene
+
+i followed up to see what the thresholds should be for human and mouse matches
+
+then filtered Dan's script results to get mitocarta proteins identified for both human and mouse databases
+
+then used selectOrthogroups.sh to put the orthogrouops w/ xiphophorus proteins into non-n-mt, non-interacting n-mt, and interacting n-mt groups
+
+
+
+2. Identify where the species-specific SNPs fall out in the gene categories (aka what genes do the SNPs belong to)
+gtf file + OG output files + xiphophorus_genename_conversion.R = xipho_transcript_info(_REDO).tsv
+- did not do the snp id part of it
+
+grep -w direct_n-mt (or other classes) xipho_transcripts.bed > direct_nmt_xipho_trancripts.bed (or other classes)
+
+head -1 ancestry-probs-par1_allchrs_CALL_alladults_hmmFebruary2021.tsv | tr "\t" "\n" | tr ":" "\t" > long_par1_CALL_SNPnames.tsv
+head -1 ancestry-probs-par1_allchrs_CHAF_mito_Feb2021.tsv | tr "\t" "\n" | tr ":" "\t" > long_par1_CHAF_SNPnames.tsv
+head -1 ancestry-probs-par1_allchrs_thinned_HUEX_STAC_cortezi_cluster_March2021.tsv | tr "\t" "\n" | tr ":" "\t" > long_par1_HUEXSTAC_SNPnames.tsv
+
+awk 'BEGIN{ FS = OFS = "\t" } { print (NR==1? "" : NR), $0 }' long_par1_CALL_SNPnames.tsv | awk 'BEGIN{ FS = OFS = "\t" } {print $2,$3,$1}' > colindex_long_par1_CALL_SNPnames.tsv
+awk 'BEGIN{ FS = OFS = "\t" } { print (NR==1? "" : NR), $0 }' long_par1_CHAF_SNPnames.tsv | awk 'BEGIN{ FS = OFS = "\t" } {print $2,$3,$1}' > colindex_long_par1_CHAF_SNPnames.tsv
+awk 'BEGIN{ FS = OFS = "\t" } { print (NR==1? "" : NR), $0 }' long_par1_HUEXSTAC_SNPnames.tsv | awk 'BEGIN{ FS = OFS = "\t" } {print $2,$3,$1}' > colindex_long_par1_HUEXSTAC_SNPnames.tsv
+
+--on ovis--
+sbatch runPythonSNPID_CALL.sh 
+sbatch runPythonSNPID_CHAF.sh 
+sbatch runPythonSNPID_HUEXSTAC.sh 
+- the above is essentially SNPonly_forHigherComputation_v4.py + xipho_transcript_info.tsv  colindex_long_par1_CALL_SNPnames.tsv > indirectnmts_SNPs.tsv 
+--on ovis-- 
+
+(delete 1st line of colindex file)
+$ python3 get_SNPs_Nmt.py direct_nmt_xipho_transcripts.bed colindex_long_par1_CALL_SNPnames.tsv > CALL_directnmts_SNPs.tsv
+$ python3 get_SNPs_Nmt.py indirect_nmt_xipho_transcripts.bed colindex_long_par1_CALL_SNPnames.tsv > CALL_indirectnmts_SNPs.tsv
+$ python3 get_SNPs_Nmt.py non_nmt_xipho_transcripts.bed colindex_long_par1_CALL_SNPnames.tsv > CALL_nonnmts_SNPs.tsv
+
+$ cut -d ":" -f 3 CALL_directnmts_SNPs.tsv > CALL_index_directnmts_SNPs.txt
+$ cut -d ":" -f 3 CALL_indirectnmts_SNPs.tsv > CALL_index_indirectnmts_SNPs.txt
+$ cut -d ":" -f 3 CALL_nonnmts_SNPs.tsv > CALL_index_nonnmts_SNPs.txt
+
+ind1=$(cat CALL_index_directnmts_SNPs.txt | tr '\n' ',' | cut -d ',' -f 1-954)
+cut -f $ind1 ../00_StartingDataFiles/ancestry-probs-par1_allchrs_CALL_alladults_hmmFebruary2021.tsv > forLD_directnmts_par1CALLdata.tsv
+cut -f $ind1 ../00_StartingDataFiles/ancestry-probs-par2_allchrs_CALL_alladults_hmmFebruary2021.tsv > forLD_directnmts_par2CALLdata.tsv
+
+ind1=$(cat CALL_index_indirectnmts_SNPs.txt | tr '\n' ',' | cut -d ',' -f 1-8580)
+$ cut -f $ind1 ../00_StartingDataFiles/ancestry-probs-par1_allchrs_CALL_alladults_hmmFebruary2021.tsv > forLD_indirectnmts_par1CALLdata.tsv
+$ cut -f $ind1 ../00_StartingDataFiles/ancestry-probs-par2_allchrs_CALL_alladults_hmmFebruary2021.tsv > forLD_indirectnmts_par2CALLdata.tsv
+
+
+for non-n-mts, used subset.sh to subset them bc there's 200k of them (is this too big?? idk)
+
+modified the subset.sh to make it fit everything (had to do this on Ovis bc Mac OS X sed SUCKS):
+$ cp CHAF_subsetnonnmtdat.sh CALL_subsetnonnmtdat.sh
+$ sed -i 's/ancestry-probs-par1_allchrs_CHAF_mito_Feb2021.tsv/ancestry-probs-par1_allchrs_CALL_alladults_hmmFebruary2021.tsv/g' CALL_subsetnonnmtdat.sh
+$ sed -i 's/ancestry-probs-par2_allchrs_CHAF_mito_Feb2021.tsv/ancestry-probs-par2_allchrs_CALL_alladults_hmmFebruary2021.tsv/g' CALL_subsetnonnmtdat.sh
+$ sed -i 's/CHAF_index/CALL_index/g' CALL_subsetnonnmtdat.sh
+$ sed -i 's/CHAFdata/CALLdata/g' CALL_subsetnonnmtdat.sh
+$ sed -i 's/indirectnmts/nonnmts/g' CALL_subsetnonnmtdat.sh
+
+bash CALL_subsetnonnmtdat.sh 
+
+ 
+
+(delete 1st line of colindex)
+$ python3 get_SNPs_Nmt.py direct_nmt_xipho_transcripts.bed colindex_long_par1_CHAF_SNPnames.tsv > CHAF_directnmts_SNPs.tsv
+$ python3 get_SNPs_Nmt.py indirect_nmt_xipho_transcripts.bed colindex_long_par1_CHAF_SNPnames.tsv > CHAF_indirectnmts_SNPs.tsv
+$ python3 get_SNPs_Nmt.py non_nmt_xipho_transcripts.bed colindex_long_par1_CHAF_SNPnames.tsv > CHAF_nonnmts_SNPs.tsv
+
+$ cut -d ":" -f 3 CHAF_directnmts_SNPs.tsv > CHAF_index_directnmts_SNPs.txt
+$ cut -d ":" -f 3 CHAF_indirectnmts_SNPs.tsv > CHAF_index_indirectnmts_SNPs.txt
+$ cut -d ":" -f 3 CHAF_nonnmts_SNPs.tsv > CHAF_index_nonnmts_SNPs.txt
+
+$ ind1=$(cat CHAF_index_directnmts_SNPs.txt | tr '\n' ',' | cut -d ',' -f 1-952)
+$ cut -f $ind1 ../00_StartingDataFiles/ancestry-probs-par1_allchrs_CHAF_mito_Feb2021.tsv > forLD_directnmts_par1CHAFdata.tsv
+$ cut -f $ind1 ../00_StartingDataFiles/ancestry-probs-par2_allchrs_CHAF_mito_Feb2021.tsv > forLD_directnmts_par2CHAFdata.tsv
+
+$ ind1=$(cat CHAF_index_indirectnmts_SNPs.txt | tr '\n' ',' | cut -d ',' -f 1-8575)
+$ cut -f $ind1 ../00_StartingDataFiles/ancestry-probs-par1_allchrs_CHAF_mito_Feb2021.tsv > forLD_indirectnmts_par1CHAFdata.tsv
+$ cut -f $ind1 ../00_StartingDataFiles/ancestry-probs-par2_allchrs_CHAF_mito_Feb2021.tsv > forLD_indirectnmts_par2CHAFdata.tsv
+
+CHAF_subsetdat.sh has indirectnmts, so changed to non-n-mts
+
+cp CALL_subsetnonnmtdat.sh CHAF_subsetnonnmtdat.sh
+$ sed -i 's/ancestry-probs-par1_allchrs_CALL_alladults_hmmFebruary2021.tsv/ancestry-probs-par1_allchrs_CHAF_mito_Feb2021.tsv/g' CHAF_subsetnonnmtdat.sh
+$ sed -i 's/ancestry-probs-par2_allchrs_CALL_alladults_hmmFebruary2021.tsv/ancestry-probs-par2_allchrs_CHAF_mito_Feb2021.tsv/g' CHAF_subsetnonnmtdat.sh
+$ sed -i 's/CALL_index/CHAF_index/g' CHAF_subsetnonnmtdat.sh
+$ sed -i 's/CALLdata/CHAFdata/g' CHAF_subsetnonnmtdat.sh
+
+bash CHAF_subsetnonnmtdat.sh
+
+
+
+(delete first row of colindex)
+$ python3 get_SNPs_Nmt.py direct_nmt_xipho_transcripts.bed colindex_long_par1_HUEXSTAC_SNPnames.tsv > HUEXSTAC_directnmts_SNPs.tsv
+$ python3 get_SNPs_Nmt.py indirect_nmt_xipho_transcripts.bed colindex_long_par1_HUEXSTAC_SNPnames.tsv > HUEXSTAC_indirectnmts_SNPs.tsv
+$ python3 get_SNPs_Nmt.py non_nmt_xipho_transcripts.bed colindex_long_par1_HUEXSTAC_SNPnames.tsv > HUEXSTAC_nonnmts_SNPs.tsv
+
+$ cut -d ":" -f 3 HUEXSTAC_directnmts_SNPs.tsv > HUEXSTAC_index_directnmts_SNPs.txt
+$ cut -d ":" -f 3 HUEXSTAC_indirectnmts_SNPs.tsv > HUEXSTAC_index_indirectnmts_SNPs.txt
+$ cut -d ":" -f 3 HUEXSTAC_nonnmts_SNPs.tsv > HUEXSTAC_index_nonnmts_SNPs.txt
+
+$ ind1=$(cat HUEXSTAC_index_directnmts_SNPs.txt | tr '\n' ',' | cut -d ',' -f 1-997)
+$ cut -f $ind1 ../00_StartingDataFiles/ancestry-probs-par1_allchrs_thinned_HUEX_STAC_cortezi_cluster_March2021.tsv > forLD_directnmts_par1HUEXSTACdata.tsv
+$ cut -f $ind1 ../00_StartingDataFiles/ancestry-probs-par2_allchrs_thinned_HUEX_STAC_cortezi_cluster_March2021.tsv > forLD_directnmts_par2HUEXSTACdata.tsv
+
+$ ind1=$(cat HUEXSTAC_index_indirectnmts_SNPs.txt | tr '\n' ',' | cut -d ',' -f 1-9399)
+$ cut -f $ind1 ../00_StartingDataFiles/ancestry-probs-par1_allchrs_thinned_HUEX_STAC_cortezi_cluster_March2021.tsv > forLD_indirectnmts_par1HUEXSTACdata.tsv
+$ cut -f $ind1 ../00_StartingDataFiles/ancestry-probs-par2_allchrs_thinned_HUEX_STAC_cortezi_cluster_March2021.tsv > forLD_indirectnmts_par2HUEXSTACdata.tsv
+
+cp CALL_subsetnonnmtdat.sh HUEXSTAC_subsetnonnmtdat.sh 
+$ sed -i 's/ancestry-probs-par1_allchrs_CALL_alladults_hmmFebruary2021.tsv/ancestry-probs-par1_allchrs_thinned_HUEX_STAC_cortezi_cluster_March2021.tsv/g' HUEXSTAC_subsetnonnmtdat.sh
+$ sed -i 's/ancestry-probs-par2_allchrs_CALL_alladults_hmmFebruary2021.tsv/ancestry-probs-par2_allchrs_thinned_HUEX_STAC_cortezi_cluster_March2021.tsv/g' HUEXSTAC_subsetnonnmtdat.sh
+$ sed -i 's/CALL_index/HUEXSTAC_index/g' HUEXSTAC_subsetnonnmtdat.sh
+$ sed -i 's/CALLdata/HUEXSTACdata/g' HUEXSTAC_subsetnonnmtdat.sh
+
+bash HUEXSTAC_subsetnonnmtdat.sh
+
+
+
+
+
+3. Calculate LD for each SNP -- done on computer cluster (calculate allele frequency for HC)
+using subsetted data created above for each population
+
+for CALL r^2:
+sbatch run_r-squared_CALLdirnmts.sh
+sbatch run_r-squared_CALLindirnmts.sh
+sbatch run_r-squared_CALLnonnmts.sh
+
+for CALL D':
+sbatch run_v3_CALLdirectnmts.sh
+sbatch run_v3_CALLmt1_indirect.sh
+sbatch run_v3_CALLmt1_nonnmt.sh 
+
+CHAF r^2:
+sbatch run_CHAFdirectnmts_v3.sh
+sbatch run_v3_CHAFmt1_indirect.sh
+sbatch run_v3_CHAFmt1_nonnmt.sh
+
+CHAF D':
+sbatch directnmtsCHAF_run_r-squared.sh
+sbatch indirectnmtsCHAF_run_r-squared.sh
+sbatch nonnmtsCHAF_run_r-squared.sh 
+
+
+for HC allelefreq:
+sbatch runAlleleFreqHCdirectnmts.sh
+sbatch runAlleleFreqHCindirectnmts.sh
+sbatch runAlleleFreqHCnonnmts.sh
+
+
+
+
+4. Average LD across genes & make figures
+for CALL D':
+using CALL_SNPinfo.tsv, mt1_results_forLD_directnmts_par1CALLdata.tsv, mt1_results_indirectnmt_CALL_ALL.tsv, mt1_results_nonnmt_CALL_ALL.tsv
+ran:
+CALLdirect_avgD-prime.R
+CALLindirect_AverageDPrime.R
+CALLnonnmt_avgd-prime.R
+& to make figure: gene-avg-d-primePlotMaker.R (change popoulation object to CALL & change working directory)
+
+
+for CHAF D':
+using CHAF_SNPinfo.tsv, mt1_results_forLD_directnmts_par1CHAFdata.tsv, mt1_results_indirectnmt_CHAF_ALL.tsv, mt1_results_nonnmt_CHAF_ALL.tsv
+ran:
+CHAFdirect_AverageLD.R
+CHAFindirect_AverageLD.R
+CHAFnonnmt_avgd-prime.R
+& to make figure: gene-avg-d-primePlotMaker.R (change popoulation object to CHAF & change working directory)
+
+
+for CALL r^2:
+using CALL_SNPinfo.tsv, mt1_results_forLD_directnmts_par1CALLdata.tsv, mt1_results_indirectnmt_CALL_ALL.tsv, mt1_results_nonnmt_CALL_ALL.tsv (from CALL_r-squared)
+ran:
+CALLdirect_avgr_squared.R
+CALLindirect_AverageRSquared.R
+CALLnonnmt_AverageRSquared.R
+& to make figure: gene-avg-r-squared-PlotMaker.R (change population object to CALL and change working directory)
+
+
+for CAHF r^2:
+using CHAF_SNPinfo.tsv, mt1_results_forLD_directnmts_par1CHAFdata.tsv, mt1_results_indirectnmt_CHAF_ALL.tsv, mt1_results_nonnmt_CHAF_ALL.tsv (from CHAF_r-squared)
+ran:
+CHAFdirect_avgr_squared.R
+CHAFindirect_AverageRSquared.R
+CHAFnonnmt_AverageRSquared.R
+& to make figure: gene-avg-r-squared-PlotMaker.R (change population object to CHAF and change working directory)
+
+
+
+5. Calculate allele frequency for HC population and make figures
+an R script for each SNP type:
+HUEX_STAC_directn-mt_allelefreq_calculation.R
+HUEX_STAC_indirectn-mt_allelefreq_calculation.R 
+HUEX_STAC_non_nmt_allelefreq_calculation.R 
+
+uses the subsetted "forLD" files created above in step 2
+
+then use 
+HUEXSTAC_allclasses_avgAlleleFreq.R
+to average allele frequency across genes
+
+and
+______
+to make the plots
+
+
+
+
+
+
+
+
+WHEN YOU COME BACK 8/23
+- run allele freq for HC
+
+
+
+
+When you come back later
+- run avg LD for HC
+- run plot maker for HC
+
+
+
+
+
+
+
+
