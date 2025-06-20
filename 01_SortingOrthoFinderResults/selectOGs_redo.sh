@@ -57,14 +57,3 @@ done #this has separated non-direct n-mt (xipho_nmt) from direct interacting n-m
 
 echo "DONE adding files to xipho_direct_nmt"
 
-###########################################################################################
-#EXTRA NOTES IGNORE FOR NOW
-###maybe need to do if statement for filtering genes into n-mt or non-n-mt
-#essentially: if (file has fasta headers that are in the n-mt file list) {save to n-mt} else {save to non-n-mt}
-
-#the xiphomtcartagroups file is the n-mt orthogroups
-
-#then need to get the fasta headers for the xiphophorus sequences in there along with the human annotations so I can annotate the xiphophorus seqs with the human/mouse annotations OR just get the xipho fasta seqs in categories of N-mt etc.
-
-#then repeat same stuff but for list of genes that are direct interacting n-mt genes
-
