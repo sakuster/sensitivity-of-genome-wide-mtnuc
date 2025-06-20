@@ -1,0 +1,9 @@
+mkdir: cannot create directory ‘xiphophorus_groups’: File exists
+moving files to xiphophorus_groups...
+DONE moving files to xiphophorus_groups
+adding files to xipho_nmt...
+mkdir: cannot create directory ‘xipho_nmt’: File exists
+DONE adding files to xipho_nmt
+adding files to xipho_direct_nmt
+mkdir: cannot create directory ‘xipho_direct_nmt’: File exists
+DONE adding files to xipho_direct_nmt
