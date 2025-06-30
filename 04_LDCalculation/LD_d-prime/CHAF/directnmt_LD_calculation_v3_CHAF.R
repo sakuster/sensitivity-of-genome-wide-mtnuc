@@ -2,12 +2,6 @@
 ###Shady Kuster
 ###21 July 2022
 
-###this script currently is for use of smaller sets of data
-###eventually, will be translated into a bash script or something
-###else bc R can't handle the data I have
-
-#this has been modified for ovis
-
 #set output filenames (modify each time)
 out_fn_ALL <- "mt1_results_directnmt_CHAF_ALL.tsv"
 plot1_fn <- "CHAF_mt1_LD_plot_DPRIME_directnmts.pdf"
@@ -33,8 +27,7 @@ for (filename in 1:length(p1_fn_l)) {
   p1_fn <- p1_fn_l[filename]
   p2_fn <- p2_fn_l[filename]
   out_fn <- out_fn_l[filename]
-  #read in cut data
-  #data has been made much smaller through use of bash command cut
+  
   par1 <- read.csv(p1_fn, header = TRUE, sep = '\t') 
   par2 <- read.csv(p2_fn, header = TRUE, sep = '\t')
   mt1 <- read.csv(mtpar1_filename, header = TRUE, sep = '\t')
@@ -115,28 +108,9 @@ for (filename in 1:length(p1_fn_l)) {
   } #end huge for
   
   write.table(results, out_fn, sep = "\t", quote = FALSE, row.names = FALSE)
-  #can also just append to OG file here
-  #YOU ARE INCLUDING THE MT LOCI 
+  
 } #end of giant for going through filenames
 
-###then need to read in all 3 and combine?
-#base_fn <- "results_directnmt_CHAF"
-#
-#result_files <- list.files(path = "mt3_CHAF/", pattern = base_fn)
-#
-#for (f in 1:length(result_files)) {
-#  #whole_fn <- paste0(base_fn, f, ".tsv")
-#  print(paste("adding ", f))
-#  result_data <- read.table(result_files[f], sep = "\t", header = TRUE)
-#  
-#  if (f ==1) {
-#    d <- data.frame(result_data) #need to add which subset it's from so the locus means something
-#  } else {
-#    d <- rbind(d, result_data)
-#  }
-#}
-#
-#write.table(d, out_fn_ALL,sep = "\t", quote = FALSE, row.names = FALSE)
 
 library(ggplot2)
 
@@ -150,24 +124,4 @@ p2 <- ggplot(d, aes(x = row.names(d), y = D)) + geom_point() + labs(title = out_
 
 ggsave(plot1_fn, p1, width = 9, height = 5)
 ggsave(plot2_fn, p2, width = 9, height = 5)
-# 
-# library(dplyr)
-# 
-# #dir <- d[1:length(d$locus) -1,] %>% mutate(class = "direct_n-mt")
-# dir <- read.table("results_directnmt_CHAFredo.tsv", header = TRUE, sep = "\t", nrows = 991) %>% mutate(class = "direct_n-mt")
-# indir <- read.table("results_indirectnmt_CHAF_ALL.tsv", header = TRUE, sep = "\t") %>% mutate(class = "indirect_n-mt")
-# non <- read.table("results_nonnmt_CHAF_ALL.tsv", header = TRUE, sep = "\t") %>% mutate(class = "non_n-mt")
-# 
-# #accidentally included the mt locus in the final output, removing it
-# indir <- filter(indir, D_prime < 0.8)
-# non <- filter(non, D_prime < 0.8) #the ones above 0.8 are the mt locus
-# 
-# 
-# dat <- rbind(dir, indir, non)
-# 
-# all_plot <- ggplot(dat, aes(x = class, y = D_prime, color = class)) + 
-#   geom_boxplot() + theme_classic() + labs(title = "LD for one mt locus")
-# all_plot
-# 
-# 
-# ggsave("One_mt_all_LD.pdf",all_plot, width = 7, height = 4)
+
