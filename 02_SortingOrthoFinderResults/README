@@ -1,5 +1,19 @@
-This folder sorts the output of OrthoFinder, which is not uploaded here. 
+This directory contains how I split the Xiphophorus genes into non-n-mt, non-interacting n-mt, and interacting n-mt gene lists. 
 
 Our run of OrthoFinder was stored in a local folder called Results_Jun10, so if you see any reference to that directory, it is the OrthoFinder output. 
 
 The list of n-mt genes and interacting n-mt genes came from MCtoUP folder (find that directory in the main of this repository)
+
+
+
+First, OrthoFinder was ran containing proteins from Xiphophorus, Homo sapiens, and Mus musculus. 
+
+Then, I used MitoCarta 3.0 to get the n-mt gene lists (both interacting and not). These were converted into uniprot IDs based on a blast and subsequent categorization by Dan's perl script and my postMCtoUP.R script. 
+
+The AllNmt... and InteractingNmt... gene lists were used to pull xiphophorus protein containing orthogroup files into either interacting or non-interacting (those remaining from the AllNmt list after the interacting ones were moved to a new dir)
+
+The selectOGs.sh was used to move all of the files. 
+
+The Results_Jun10 directory was from my original run of OrthoFinder in 2021. 
+
+All the rest of this directory was created/ran in Aug 2024. 
