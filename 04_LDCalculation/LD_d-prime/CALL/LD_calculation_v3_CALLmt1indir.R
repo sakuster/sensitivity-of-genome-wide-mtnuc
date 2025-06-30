@@ -2,14 +2,6 @@
 ###Shady Kuster
 ###21 July 2022
 
-###this script currently is for use of smaller sets of data
-###eventually, will be translated into a bash script or something
-###else bc R can't handle the data I have
-
-#this has been modified for ovis
-
-#this has been modded for mt1indirectnmts
-
 #set output filenames (modify each time)
 out_fn_ALL <- "mt1_CALL/mt1_results_indirectnmt_CALL_ALL.tsv"
 plot1_fn <- "CALLmt1_LD_plot_DPRIME_indirectnmts.pdf"
@@ -36,13 +28,11 @@ for (filename in 1:length(p1_fn_l)) {
   p1_fn <- p1_fn_l[filename]
   p2_fn <- p2_fn_l[filename]
   out_fn <- out_fn_l[filename]
-  #read in cut data
-  #data has been made much smaller through use of bash command cut
   par1 <- read.csv(p1_fn, header = TRUE, sep = '\t') 
   par2 <- read.csv(p2_fn, header = TRUE, sep = '\t')
   mt1 <- read.csv(mtpar1_filename, header = TRUE, sep = '\t')
   mt2 <- read.csv(mtpar2_filename, header = TRUE, sep = '\t')
-  #add mt column at end of par1 and par2 JUST FOR TESTING FOR NOW IDK WHAT TO DO
+  #add mt column at end of par1 and par2
   par1 <- cbind(par1, mt1)
   par2 <- cbind(par2, mt2)
  
@@ -80,7 +70,7 @@ for (filename in 1:length(p1_fn_l)) {
     l1sum = 0
     l2sum = 0
     
-    for (i in 1:n) { #this is adding the header for some reason???
+    for (i in 1:n) { 
       l1sum <- l1sum + par1[i,locus1] + 0.5*(1-par1[i,locus1]-par2[i,locus1])
       l2sum <- l2sum + par1[i,locus2] + 0.5*(1-par1[i,locus2]-par2[i,locus2])
     }
@@ -118,11 +108,10 @@ for (filename in 1:length(p1_fn_l)) {
   } #end huge for
   
   write.table(results, out_fn, sep = "\t", quote = FALSE, row.names = FALSE)
-  #can also just append to OG file here
-  #YOU ARE INCLUDING THE MT LOCI 
+  
 } #end of giant for going through filenames
 
-###then need to read in all 3 and combine?
+###then need to combine
 base_fn <- "mt1_results_forLD_indirectnmt"
 
 result_files <- list.files(path = "mt1_CALL", pattern = base_fn)
@@ -144,8 +133,6 @@ write.table(d, out_fn_ALL,sep = "\t", quote = FALSE, row.names = FALSE)
 
 library(ggplot2)
  
-# d <- results
- 
 p1 <- ggplot(d, aes(x = row.names(d), y = D_prime)) + geom_point() + labs(title = out_fn_ALL)
 # 
 p2 <- ggplot(d, aes(x = row.names(d), y = D)) + geom_point() + labs(title = out_fn_ALL)
@@ -153,24 +140,4 @@ p2 <- ggplot(d, aes(x = row.names(d), y = D)) + geom_point() + labs(title = out_
 # 
 ggsave(plot1_fn, p1, width = 9, height = 5)
 ggsave(plot2_fn, p2, width = 9, height = 5)
-# 
-# library(dplyr)
-# 
-# #dir <- d[1:length(d$locus) -1,] %>% mutate(class = "direct_n-mt")
-# dir <- read.table("results_directnmt_CALLredo.tsv", header = TRUE, sep = "\t", nrows = 991) %>% mutate(class = "direct_n-mt")
-# indir <- read.table("results_indirectnmt_CALL_ALL.tsv", header = TRUE, sep = "\t") %>% mutate(class = "indirect_n-mt")
-# non <- read.table("results_nonnmt_CALL_ALL.tsv", header = TRUE, sep = "\t") %>% mutate(class = "non_n-mt")
-# 
-# #accidentally included the mt locus in the final output, removing it
-# indir <- filter(indir, D_prime < 0.8)
-# non <- filter(non, D_prime < 0.8) #the ones above 0.8 are the mt locus
-# 
-# 
-# dat <- rbind(dir, indir, non)
-# 
-# all_plot <- ggplot(dat, aes(x = class, y = D_prime, color = class)) + 
-#   geom_boxplot() + theme_classic() + labs(title = "LD for one mt locus")
-# all_plot
-# 
-# 
-# ggsave("One_mt_all_LD.pdf",all_plot, width = 7, height = 4)
+
