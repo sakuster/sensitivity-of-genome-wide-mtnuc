@@ -1,0 +1,2 @@
+this directory contains the scripts necessary to average LD / allele frequency values within genes (e.g., if a gene has multiple AIMs, averaging those LD values to produce a gene-averaged LD value) and the scripts needed to produce figures
+                                                                                                                                                                                            
