@@ -1,0 +1,6 @@
+this directory contains:
+filterancestry.py --> a script to calculate average nuclear ancestry across each fish for the major parent and filter 1) any summed AIM (from both parents) between 0.8 and 0.2 and 2) any fish with ambiguous nuclear ancestry calls
+
+MtAncestryDetermination.py --> very similar to filterancestry.py but only grabs the mitochondrial AIMs
+
+NucAncestryFig.R --> produces figures 2, figure 3b in the manuscript
