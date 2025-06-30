@@ -20,7 +20,6 @@ setwd("/Users/kusters/Documents/XiphoStartingOver_Aug2024/05_avgLD/HC_allelefreq
 #read in the snp file
 snp <- read.table("../CHAF_SNPinfo.tsv", header = T, sep = '\t', quote = "") %>%
   mutate(ID = paste(SNP_scaffold, locus, sep = '.')) 
-## this only has 738 direct nmts... what's up with that
 
 snp$ID <- gsub("-", ".", snp$ID)
 
