@@ -15,7 +15,6 @@ setwd("/Users/kusters/Documents/XiphoStartingOver_Aug2024/05_avgLD/d-prime/CALL"
 snp <- read.table("CALL_SNPinfo.tsv", header = T, sep = '\t', quote = "") %>%
   mutate(ID = paste(SNP_scaffold, locus, sep = '.')) %>%
   filter(class == "direct_n-mt")
-## this only has 738 direct nmts... what's up with that
   
 snp$ID <- gsub("-", ".", snp$ID)
 
@@ -25,7 +24,6 @@ ld <- read.table("mt1_results_forLD_directnmts_par1CALLdata.tsv", header = T, se
 
 #merge based off of Scaffold ID & locus
 joined_SNPs <- right_join(snp, ld, by = "ID")
-## this, per above, also is only 738 (the LD is 991)
 
 #average LD vals based off of gene
 avgLD <- joined_SNPs %>%
@@ -36,7 +34,7 @@ avgLD <- joined_SNPs %>%
 write.table(avgLD, "CALLdirectnmt_avgd-prime.tsv", row.names = F, sep = '\t',
             col.names = T, quote = F)
 
-#create plot??
+#create plot
 p1 <- ggplot(avgLD, aes(x = attribute, y = avgD_prime)) +
   geom_point() +
   theme_classic() +
