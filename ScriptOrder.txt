@@ -5,13 +5,11 @@ Order of operations
 1. Identify N-mt Genes in Xiphophorus
 
 get mitocarta gene list (has official gene symbol on it)
-- use Dan's perl script to find blast matches that match each mitocarta gene
+- use mitocarta_to_uniprot.pl to find blast matches that match each mitocarta gene
 
-i followed up to see what the thresholds should be for human and mouse matches
+filter script results to get mitocarta proteins identified for both human and mouse databases
 
-then filtered Dan's script results to get mitocarta proteins identified for both human and mouse databases
-
-then used selectOrthogroups.sh to put the orthogrouops w/ xiphophorus proteins into non-n-mt, non-interacting n-mt, and interacting n-mt groups
+use selectOrthogroups.sh to categorize OrthoFinder orthogroups with xiphophorus proteins into non-n-mt, non-interacting n-mt, and interacting n-mt groups
 
 
 
@@ -209,30 +207,6 @@ HUEXSTAC_allclasses_avgAlleleFreq.R
 to average allele frequency across genes
 
 and
-______
+gene-avg-allelefreqPlotMaker.R
 to make the plots
-
-
-
-
-
-
-
-
-WHEN YOU COME BACK 8/23
-- run allele freq for HC
-
-
-
-
-When you come back later
-- run avg LD for HC
-- run plot maker for HC
-
-
-
-
-
-
-
 
