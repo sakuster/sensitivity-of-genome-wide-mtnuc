@@ -27,7 +27,9 @@ joined_SNPs <- right_join(snp, ld, by = "ID")
 #average LD vals based off of gene
 avgLD <- joined_SNPs %>%
   group_by(attribute) %>%
-  summarize(avgR_squared = mean(r_squared)) 
+  dplyr::summarize(avgR_squared = mean(r_squared),
+                   numSamples = sum(samples) / n(),
+                   numAIMs = n_distinct(ID)) 
 
 #export avg LD tsv
 write.table(avgLD, "CALLdirectnmt_avgr-squared.tsv", row.names = F, sep = '\t',

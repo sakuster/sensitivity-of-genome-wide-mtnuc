@@ -5,7 +5,6 @@
 #load libraries
 library(dplyr)
 library(ggridges)
-library(dplyr)
 library(ggplot2)
 
 setwd("/Users/kusters/Documents/XiphoStartingOver_Aug2024/05_avgLD/r-squared/CALL")
@@ -27,7 +26,9 @@ joined_SNPs <- right_join(snp, ld, by = "ID")
 #average LD vals based off of gene
 avgLD <- joined_SNPs %>%
   group_by(attribute) %>%
-  summarize(avgR_squared = mean(r_squared))
+  dplyr::summarize(avgR_squared = mean(r_squared),
+                   numSamples = sum(samples) / n(),
+                   numAIMs = n_distinct(ID))
 
 #export avg LD tsv
 write.table(avgLD, "CALLindirectnmt_avgr-squared.tsv", row.names = F, sep = '\t',
