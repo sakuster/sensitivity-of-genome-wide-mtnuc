@@ -1,1 +1,3 @@
 This directory provides scripts to calculate D', r2, and allele frequency for CALL, CHAF, and/or HUEX-STAC
+
+v4 files were added following revisions that added better filtering to AIMs
