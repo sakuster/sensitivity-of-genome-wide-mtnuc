@@ -20,7 +20,8 @@ snp$ID <- gsub("-", ".", snp$ID)
 
 #read in the LD file
 ld <- read.table("mt1_results_nonnmt_CHAF_ALL.tsv", header = T, sep = '\t', quote = "") %>%
-  mutate(ID = ScaffoldID)
+  mutate(ID = ScaffoldID) %>%
+  filter(samples > 50)
 
 #merge based off of Scaffold ID & locus
 joined_SNPs <- right_join(snp, ld, by = "ID")
@@ -28,7 +29,10 @@ joined_SNPs <- right_join(snp, ld, by = "ID")
 #average LD vals based off of gene
 avgLD <- joined_SNPs %>%
   group_by(attribute) %>%
-  summarize(avgD_prime = mean(D_prime))
+  summarize(avgD_prime = mean(D_prime),
+            avgR_squared = mean(r_squared),
+            numSamples = sum(samples) / n(),
+            numAIMs = n_distinct(ID))
 
 #export avg LD tsv
 write.table(avgLD, "CHAFnonnmt_avgd-prime.tsv", row.names = F, sep = '\t',

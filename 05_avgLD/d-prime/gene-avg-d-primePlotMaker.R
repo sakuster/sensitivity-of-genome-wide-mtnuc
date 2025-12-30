@@ -10,7 +10,7 @@ library(tidystats)
 
 
 #set inputs
-population <- "CHAF"
+population <- "CALL"
 direct_fn <- paste0(population, "directnmt_avgd-prime.tsv")
 indir_fn <- paste0(population, "indirectnmt_avgd-prime.tsv")
 non_fn <- paste0(population, "nonnmt_avgd-prime.tsv")
@@ -34,14 +34,14 @@ mypalette <- c("#457373", "#A4BDBE", "#D589B1") #rose, light gray, dark teal
 geneList <- data.frame(attribute = c("g8054.t1", #Ndufs5
               "g3279.t1", #Ndufa13
               "g3322.t1", #MTERF4 ; UQCR11 not found
-              "g6088.t1", #ATP5MG -- isn't in CHAF for some reason??
-              "g6066.t1", #C1QBP
+             "g3595.t1", #"g6088.t1", #ATP5MG -- isn't in CHAF for some reason??
+              #"g6066.t1", #C1QBP
               "g15308.t1", #MMUT
               "g15060.t1", #SMIM8
               "g15051.t1", #LYRM2
               "g15056.t1", #RMDN3
               "g11575.t1"), #UQCRC2
-              GN = c("NDUFS5", "NDUFA13","MTERF4", "ATP5MG", "C1QBP",
+              GN = c("NDUFS5", "NDUFA13","MTERF4", "ATP5MG",# "C1QBP",
                      "MMUT", "SMIM8", "LYRM2", "RMDN3", "UQCRC2")) 
 
 incompat_genes <- inner_join(geneList, dat, by = "attribute")
@@ -84,7 +84,7 @@ incompat_plot <- ggplot(dat, aes(y = class, x = avgD_prime, fill = class)) +
   geom_density_ridges() +
   scale_fill_manual(values = mypalette,
                     limits = c("non-n-mt", "non-interacting n-mt", "interacting n-mt")) +
-  geom_vline(xintercept = mean(dat$avgD_prime), linetype = "dashed") +
+  geom_vline(xintercept = mean(dat$avgD_prime, na.rm = T), linetype = "dashed") +
   geom_point(data = incompat_genes, 
              aes(y = class, x = avgD_prime),
              show.legend=FALSE) +
@@ -104,7 +104,7 @@ incompat_plot <- ggplot(dat, aes(y = class, x = avgD_prime, fill = class)) +
         legend.position = c(0.2,0.8),
         plot.title = element_text(hjust = 0.5)) +
   
-  labs(title = expression(bold("CHAF")),
+  labs(title = expression(bold("CALL")),
        x = expression(italic("D'")), 
        y = "Gene Class Density") +
   xlim(min(dat$avgD_prime), max(dat$avgD_prime))
@@ -113,14 +113,17 @@ incompat_plot
 
 ggsave(output_fn2, incompat_plot, width = 7, height = 4)
 ggsave(path = "/Users/kusters/Library/CloudStorage/OneDrive-Colostate/Research/Xiphophorus/Writing",
-       "SuppFig_CHAF-d-prime-incompatibilityPlot.pdf", plot = incompat_plot, width = 8, height = 5)
+       paste0("SuppFig_", population, "-d-prime-incompatibilityPlot_Oct2025.pdf"), plot = incompat_plot, width = 8, height = 5)
 
 #one way anova test
 dat2 <- rbind(non, indir, dir)
 dat2$class <- as.factor(dat2$class)
 dat_df <- as.data.frame(dat2)
 
-sumStats <- group_by(dat_df, class) %>% summarise(count = n(), mean = mean(avgD_prime), sd = sd(avgD_prime))
+sumStats <- group_by(dat_df, class) %>% 
+  summarise(count = n(), 
+            mean = mean(avgD_prime, na.rm = T), 
+            sd = sd(avgD_prime, na.rm = T))
 
 OneWayFit <- lm(avgD_prime ~ class, data = dat_df)
 aov <- anova(OneWayFit)
@@ -150,8 +153,8 @@ write.table(top1, paste0(population, "_ALLGENES_topOnePercentDPrime.tsv"), row.n
 statDat <- dat %>%
   mutate(topOne = case_when(attribute %in% top1$attribute ~ "yes",
                             !attribute %in% top1$attribute ~ "no"),
-         n_mt =  case_when(class == "direct_n-mt" | class == "indirect_n-mt" ~ "yes",
-                          class == "non_n-mt" ~ "no")) %>%
+         n_mt =  case_when(class == "interacting n-mt" | class == "non-interacting n-mt" ~ "yes",
+                          class == "non-n-mt" ~ "no")) %>%
   group_by(topOne, n_mt) %>%
   summarise(n = n())
 
@@ -189,12 +192,12 @@ newRow <- statDat2 %>%
   mutate(category = paste(topOne, class, sep = "_"))
 
 numsStatTest2 <- data.frame(
-  "topOne_no" = c(as.numeric(newRow[which(newRow$category == "no_direct_n-mt"),3]), 
-                  as.numeric(newRow[which(newRow$category == "no_indirect_n-mt"),3]),
-                  as.numeric(newRow[which(newRow$category == "no_non_n-mt"),3])),
-  "topOne_yes" = c(as.numeric(newRow[which(newRow$category == "yes_direct_n-mt"),3]), 
-                   as.numeric(newRow[which(newRow$category == "yes_indirect_n-mt"),3]),
-                   as.numeric(newRow[which(newRow$category == "yes_non_n-mt"),3])),
+  "topOne_no" = c(as.numeric(newRow[which(newRow$category == "no_interacting n-mt"),3]), 
+                  as.numeric(newRow[which(newRow$category == "no_non-interacting n-mt"),3]),
+                  as.numeric(newRow[which(newRow$category == "no_non-n-mt"),3])),
+  "topOne_yes" = c(as.numeric(newRow[which(newRow$category == "yes_interacting n-mt"),3]), 
+                   as.numeric(newRow[which(newRow$category == "yes_non-interacting n-mt"),3]),
+                   as.numeric(newRow[which(newRow$category == "yes_non-n-mt"),3])),
   row.names = c("interacting-n-mt", "non-interacting-n-mt", "non-n-mt"),
   stringsAsFactors = F
 )
@@ -251,7 +254,29 @@ statList <- statList |>
   add_stats(g2Test) |>
   add_stats(test)
 
-write_stats(statList, paste0(population, "statistics.txt"))
+write_stats(statList, paste0(population, "d-prime-statistics.txt"))
 
 #want to save the fischer test plot after modifying the text so it doesn't overlap!! (might have to do this in illustrator) 
+
+
+
+#z score calculation
+avgD <- mean(dat$avgD_prime, na.rm = T)
+sdD <- sd(dat$avgD_prime, na.rm = T)
+
+avgR <- mean(dat$avgR_squared, na.rm = T)
+sdR <- sd(dat$avgR_squared, na.rm = T)
+
+zScores <- dat %>%
+  right_join(geneList, by = "attribute") %>%
+  mutate(D_zScore = (avgD_prime - avgD) / sdD,
+         R_zScore = (avgR_squared - avgR) / sdR)
+
+
+
+write.table(top1, paste0(population, "d-prime-r-sq-zScores.tsv"), row.names = F, sep = '\t',
+            col.names = T, quote = F)
+
+
+
 
